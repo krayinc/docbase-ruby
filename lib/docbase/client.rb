@@ -38,7 +38,7 @@ module DocBase
       connection.get("/teams/#{team!}/posts", q: q)
     end
 
-    def create_posts(params)
+    def create_post(params)
       connection.post("/teams/#{team!}/posts", params)
     end
 

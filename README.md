@@ -81,7 +81,7 @@ params = {
   notice: true,
 }
 
-client.create_posts(params).body
+client.create_post(params).body
 ```
 
 ### switch team
