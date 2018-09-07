@@ -55,6 +55,12 @@ client.tags.body
 client.groups.body
 ```
 
+#### Show
+
+```ruby
+client.group(1).body
+```
+
 #### Create
 
 ```ruby
