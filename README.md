@@ -59,13 +59,13 @@ client.groups.body
 #### Search
 
 ```ruby
-client.create_posts(q: 'body').body
+client.create_posts(q: 'body')
 ```
 
 #### Show
 
 ```ruby
-client.post(1).body
+client.post(1)
 ```
 
 #### Create
@@ -81,7 +81,13 @@ params = {
   notice: true,
 }
 
-client.create_post(params).body
+client.create_post(params)
+```
+
+#### Delete
+
+```ruby
+client.delete_post(1)
 ```
 
 ### switch team

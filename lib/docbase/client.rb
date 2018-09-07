@@ -42,6 +42,10 @@ module DocBase
       connection.post("/teams/#{team!}/posts", params)
     end
 
+    def delete_post(id)
+      connection.delete("/teams/#{team!}/posts/#{id}")
+    end
+
     def connection
       @connection ||= Faraday.new({ url: @url, headers: headers }) do |faraday|
         faraday.request :json
