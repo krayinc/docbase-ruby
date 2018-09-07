@@ -85,7 +85,7 @@ describe DocBase::Client do
     it_behaves_like 'stub connection', { method: :get }
   end
 
-  describe '#posts' do
+  describe '#create_posts' do
     let(:path) { "/teams/#{client.team}/posts" }
     let(:params) do
       {
@@ -120,7 +120,7 @@ describe DocBase::Client do
         },
       }
     end
-    let(:response_body) { client.posts(params).body }
+    let(:response_body) { client.create_posts(params).body }
 
     it_behaves_like 'stub connection', { method: :post }
   end

@@ -56,6 +56,8 @@ client.groups.body
 
 ### posts
 
+#### create
+
 ```ruby
 params = {
   title: 'memo title',
@@ -67,7 +69,7 @@ params = {
   notice: true,
 }
 
-client.posts(params).body
+client.create_posts(params).body
 # => {
 #   id: 1,
 #   title: 'memo title',
@@ -109,4 +111,3 @@ client.tags.body
 ## License
 
 The gem is available as open source under the terms of the [MIT License](http://opensource.org/licenses/MIT).
-
