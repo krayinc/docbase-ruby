@@ -30,6 +30,10 @@ module DocBase
       connection.get("/teams/#{team!}/groups")
     end
 
+    def posts(q: '*')
+      connection.get("/teams/#{team!}/posts", q: q)
+    end
+
     def create_posts(params)
       connection.post("/teams/#{team!}/posts", params)
     end
