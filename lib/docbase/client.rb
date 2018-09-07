@@ -46,12 +46,27 @@ module DocBase
     def update_post(params)
       post_id = params[:id].to_i
       raise NotSetTeamError if post_id <= 0
-      post_params = params.reject { |key, _| key == :id }
+
+      post_params = except(params, :id)
       connection.patch("/teams/#{team!}/posts/#{post_id}", post_params)
     end
 
     def delete_post(id)
       connection.delete("/teams/#{team!}/posts/#{id}")
+    end
+
+    def create_comment(params)
+      post_id = params[:post_id].to_i
+      raise NotSetTeamError if post_id <= 0
+
+      comment_params = except(params, :post_id)
+      connection.post("/teams/#{team!}/posts/#{post_id}/comments", params)
+    end
+
+    private
+
+    def except(hash, reject_key)
+      hash.reject { |key, _| key == reject_key }
     end
 
     def connection

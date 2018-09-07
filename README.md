@@ -107,6 +107,21 @@ client.update_post(params)
 client.delete_post(1)
 ```
 
+### Comment
+
+#### Create
+
+```ruby
+params = {
+  post_id: 1,
+  body: 'GJ!!',
+  notice: true,
+}
+
+client.create_comment(params)
+```
+
+
 ### switch team
 
 ```ruby

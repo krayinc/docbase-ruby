@@ -4,20 +4,6 @@ describe DocBase::Client do
   let(:access_token) { 'ab32vadvxG' }
   let(:client) { DocBase::Client.new(access_token: access_token, team: 'kray') }
 
-  describe '#headers' do
-    let(:headers) do
-      {
-        'Accept'         => 'application/json',
-        'User-Agent'     => DocBase::Client::USER_AGENT,
-        'X-DocBaseToken' => access_token,
-      }
-    end
-
-    it 'set headers' do
-      expect(client.headers).to eq(headers)
-    end
-  end
-
   describe '#team!' do
     context 'not set team' do
       before { client.team = nil }
