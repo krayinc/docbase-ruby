@@ -63,6 +63,10 @@ module DocBase
       connection.post("/teams/#{team!}/posts/#{post_id}/comments", params)
     end
 
+    def delete_comment(id)
+      connection.delete("/teams/#{team!}/comments/#{id}")
+    end
+
     private
 
     def except(hash, reject_key)

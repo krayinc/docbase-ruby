@@ -121,6 +121,11 @@ params = {
 client.create_comment(params)
 ```
 
+#### Delete
+
+```ruby
+client.delete_comment(1)
+```
 
 ### switch team
 
