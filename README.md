@@ -145,6 +145,15 @@ client.create_comment(params)
 client.delete_comment(1)
 ```
 
+### attachments
+
+#### Create
+
+```ruby
+client.upload('./test.jpg')
+client.upload(['./test.jpg', './README.md'])
+```
+
 ### switch team
 
 ```ruby

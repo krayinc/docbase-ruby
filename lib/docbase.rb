@@ -1,3 +1,4 @@
+require 'base64'
 require 'faraday'
 require 'faraday_middleware'
 require 'docbase/version'

@@ -75,6 +75,20 @@ module DocBase
       connection.delete("/teams/#{team!}/comments/#{id}")
     end
 
+    def upload(paths)
+      paths = [paths] unless paths.instance_of?(Array)
+
+      params = paths.map do |path|
+        file = File.new(path, 'r+b')
+        {
+          name: file.path.split('/').last,
+          content: Base64.strict_encode64(file.read),
+        }
+      end
+
+      connection.post("/teams/#{team!}/attachments", params)
+    end
+
     private
 
     def except(hash, reject_key)
