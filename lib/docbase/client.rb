@@ -5,18 +5,12 @@ module DocBase
 
     class NotSetTeamError < StandardError; end
 
+    attr_accessor :team
+
     def initialize(access_token: nil, url: nil, team: nil)
       @access_token = access_token || ENV['DOCBASE_ACCESS_TOKEN']
-      @team = team
+      self.team = team
       @url = url || DEFAULT_URL
-    end
-
-    def team=(team)
-      @team = team
-    end
-
-    def team
-      @team
     end
 
     def team!
