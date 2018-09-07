@@ -4,6 +4,7 @@ module DocBase
     USER_AGENT = "DocBase Ruby Gem #{DocBase::VERSION}"
 
     class NotSetTeamError < StandardError; end
+    class NotSetPostIdError < StandardError; end
 
     attr_accessor :team
 
@@ -40,6 +41,13 @@ module DocBase
 
     def create_post(params)
       connection.post("/teams/#{team!}/posts", params)
+    end
+
+    def update_post(params)
+      post_id = params[:id].to_i
+      raise NotSetTeamError if post_id <= 0
+      post_params = params.reject { |key, _| key == :id }
+      connection.patch("/teams/#{team!}/posts/#{post_id}", post_params)
     end
 
     def delete_post(id)

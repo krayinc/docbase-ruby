@@ -84,6 +84,23 @@ params = {
 client.create_post(params)
 ```
 
+#### Update
+
+```ruby
+params = {
+  id: 1,
+  title: 'memo title',
+  body: 'memo body',
+  draft: false,
+  tags: ['rails', 'ruby'],
+  scope: 'group',
+  groups: [1],
+  notice: true,
+}
+
+client.update_post(params)
+```
+
 #### Delete
 
 ```ruby
