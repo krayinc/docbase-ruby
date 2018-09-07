@@ -60,54 +60,12 @@ client.groups.body
 
 ```ruby
 client.create_posts(q: 'body').body
-# => [
-#      {
-#        id: 1,
-#        title: 'memo title',
-#        body: 'memo body',
-#        draft: false,
-#        url: 'https://kray.docbase.io/posts/1',
-#        created_at: '2015-03-10T12:01:54+09:00',
-#        tags: [
-#          { name: 'rails' },
-#          { name: 'ruby' },
-#        ],
-#        scope: 'group',
-#        groups: [
-#          { name: 'DocBase' }
-#        ],
-#        user: {
-#          id: 1,
-#          name: 'danny'
-#        },
-#      }
-#    ]
 ```
 
 #### Show
 
 ```ruby
 client.post(1).body
-# => {
-#   id: 1,
-#   title: 'memo title',
-#   body: 'memo body',
-#   draft: false,
-#   url: 'https://kray.docbase.io/posts/1',
-#   created_at: '2015-03-10T12:01:54+09:00',
-#   tags: [
-#     { name: 'rails' },
-#     { name: 'ruby' },
-#   ],
-#   scope: 'group',
-#   groups: [
-#     { name: 'DocBase' }
-#   ],
-#   user: {
-#     id: 1,
-#     name: 'danny'
-#   },
-# }
 ```
 
 #### Create
@@ -124,26 +82,6 @@ params = {
 }
 
 client.create_posts(params).body
-# => {
-#   id: 1,
-#   title: 'memo title',
-#   body: 'memo body',
-#   draft: false,
-#   url: 'https://kray.docbase.io/posts/1',
-#   created_at: '2015-03-10T12:01:54+09:00',
-#   tags: [
-#     { name: 'rails' },
-#     { name: 'ruby' },
-#   ],
-#   scope: 'group',
-#   groups: [
-#     { name: 'DocBase' }
-#   ],
-#   user: {
-#     id: 1,
-#     name: 'danny'
-#   },
-# }
 ```
 
 ### switch team
