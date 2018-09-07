@@ -78,6 +78,8 @@ client.create_group(params)
 
 ```ruby
 client.create_posts(q: 'body')
+client.create_posts(q: 'body', page: 2)
+client.create_posts(q: 'body', page: 1, per_page: 100)
 ```
 
 #### Show

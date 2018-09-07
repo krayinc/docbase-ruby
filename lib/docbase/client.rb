@@ -43,8 +43,8 @@ module DocBase
       connection.get("/teams/#{team!}/posts/#{id}")
     end
 
-    def posts(q: '*')
-      connection.get("/teams/#{team!}/posts", q: q)
+    def posts(q: '*', page: 1, per_page: 20)
+      connection.get("/teams/#{team!}/posts", q: q, page: page, per_page: per_page)
     end
 
     def create_post(params)
