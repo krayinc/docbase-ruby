@@ -49,9 +49,21 @@ client.tags.body
 
 ### groups
 
+#### List
+
 ```ruby
 client.groups.body
-# => [{ id: 1, name: 'DocBase' }, { id: 2, name: 'kray' }]
+```
+
+#### Create
+
+```ruby
+params = {
+  name: 'group',
+  description: 'Important group.',
+}
+
+client.create_group(params)
 ```
 
 ### posts
