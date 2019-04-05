@@ -39,6 +39,14 @@ module DocBase
       connection.post("/teams/#{team!}/groups", params)
     end
 
+    def add_users_to_group(params)
+      group_id = params[:group_id].to_i
+      raise NotSetTeamError if group_id <= 0
+
+      users_params = except(params, :group_id)
+      connection.post("/teams/#{team!}/groups/#{group_id}/users", users_params)
+    end
+
     def post(id)
       connection.get("/teams/#{team!}/posts/#{id}")
     end
