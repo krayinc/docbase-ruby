@@ -67,6 +67,10 @@ module DocBase
       connection.put("/teams/#{team!}/posts/#{id}/archive")
     end
 
+    def unarchive_post(id)
+      connection.put("/teams/#{team!}/posts/#{id}/unarchive")
+    end
+
     def create_comment(params)
       post_id = params[:post_id].to_i
       raise NotSetTeamError if post_id <= 0
