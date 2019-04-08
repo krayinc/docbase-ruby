@@ -121,6 +121,18 @@ params = {
 client.update_post(params)
 ```
 
+#### Archive
+
+```ruby
+client.archive_post(1)
+```
+
+#### Unarchive
+
+```ruby
+client.unarchive_post(1)
+```
+
 #### Delete
 
 ```ruby
