@@ -77,9 +77,9 @@ client.create_group(params)
 #### Search
 
 ```ruby
-client.create_posts(q: 'body')
-client.create_posts(q: 'body', page: 2)
-client.create_posts(q: 'body', page: 1, per_page: 100)
+client.posts(q: 'body')
+client.posts(q: 'body', page: 2)
+client.posts(q: 'body', page: 1, per_page: 100)
 ```
 
 #### Show
