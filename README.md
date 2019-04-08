@@ -40,6 +40,16 @@ client = DocBase::Client.new(team: 'your_team')
 client.teams.body
 # => [{ domain: 'kray', name: 'kray' }, { domain: 'danny', name: 'danny' }]
 ```
+
+### users
+
+```ruby
+client.users(q: 'name')
+client.users(q: 'name', page: 2)
+client.users(q: 'name', page: 1, per_page: 100)
+client.users(q: 'name', page: 1, per_page: 100, include_user_groups: true)
+```
+
 ### tags
 
 ```ruby
