@@ -72,6 +72,28 @@ params = {
 client.create_group(params)
 ```
 
+#### Add users to group
+
+```ruby
+params = {
+  group_id: 1,
+  user_ids: [10, 11, 12]
+}
+
+client.add_users_to_group(params)
+```
+
+#### Remove users from group
+
+```ruby
+params = {
+  group_id: 1,
+  user_ids: [10, 11, 12]
+}
+
+client.remove_users_from_group(params)
+```
+
 ### posts
 
 #### Search
