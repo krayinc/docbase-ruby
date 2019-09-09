@@ -34,13 +34,6 @@ ENV['DOCBASE_ACCESS_TOKEN'] = 'your_access_token'
 client = DocBase::Client.new(team: 'your_team')
 ```
 
-### teams
-
-```ruby
-client.teams.body
-# => [{ domain: 'kray', name: 'kray' }, { domain: 'danny', name: 'danny' }]
-```
-
 ### users
 
 ```ruby

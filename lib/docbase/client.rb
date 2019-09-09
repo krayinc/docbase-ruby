@@ -19,10 +19,6 @@ module DocBase
       @team
     end
 
-    def teams
-      connection.get('/teams')
-    end
-
     def users(q: nil, page: 1, per_page: 100, include_user_groups: false)
       connection.get("/teams/#{team!}/users", q: q, page: page, per_page: per_page, include_user_groups: include_user_groups)
     end
