@@ -1,3 +1,3 @@
 module DocBase
-  VERSION = '0.3.0.1'
+  VERSION = '1.0.0'
 end
