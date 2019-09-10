@@ -1,3 +1,9 @@
+## 2.0.0
+
+* DocBaseAPIv2用としてリリース
+* チーム一覧APIを廃止
+* 環境変数`DOCBASE_ACCESS_TOKEN`でのトークン読み込みを廃止
+
 ## 1.0.0
 
 * DocBaseAPIv1用としてリリース

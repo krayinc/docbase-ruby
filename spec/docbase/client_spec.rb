@@ -31,20 +31,6 @@ describe DocBase::Client do
     it { should eq(response_body) }
   end
 
-  describe '#teams' do
-    let(:path) { '/teams' }
-    let(:body) do
-      [
-       { domain: 'kray', name: 'kray' },
-       { domain: 'danny', name: 'danny' },
-      ]
-    end
-
-    let(:response_body) { client.teams.body }
-
-    it_behaves_like 'stub connection', { method: :get }
-  end
-
   describe '#tags' do
     let(:path) { "/teams/#{client.team}/tags" }
     let(:body) do

@@ -26,21 +26,6 @@ Or install it yourself as:
 client = DocBase::Client.new(access_token: 'your_access_token', team: 'your_team')
 ```
 
-or
-
-```ruby
-ENV['DOCBASE_ACCESS_TOKEN'] = 'your_access_token'
-
-client = DocBase::Client.new(team: 'your_team')
-```
-
-### teams
-
-```ruby
-client.teams.body
-# => [{ domain: 'kray', name: 'kray' }, { domain: 'danny', name: 'danny' }]
-```
-
 ### users
 
 ```ruby
@@ -208,6 +193,7 @@ client.tags.body
 # => [{ name: 'ruby' }, { name: 'rails' }]
 
 client.team = 'danny'
+clinet.access_token = 'danny_team_access_token'
 client.tags.body
 # => [{ name: 'javascript' }, { name: 'react' }]
 ```

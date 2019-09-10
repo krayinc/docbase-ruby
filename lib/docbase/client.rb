@@ -6,10 +6,10 @@ module DocBase
     class NotSetTeamError < StandardError; end
     class NotSetPostIdError < StandardError; end
 
-    attr_accessor :team
+    attr_accessor :team, :access_token
 
     def initialize(access_token: nil, url: nil, team: nil)
-      @access_token = access_token || ENV['DOCBASE_ACCESS_TOKEN']
+      self.access_token = access_token
       self.team = team
       @url = url || DEFAULT_URL
     end
@@ -17,10 +17,6 @@ module DocBase
     def team!
       raise NotSetTeamError unless @team
       @team
-    end
-
-    def teams
-      connection.get('/teams')
     end
 
     def users(q: nil, page: 1, per_page: 100, include_user_groups: false)
@@ -135,8 +131,8 @@ module DocBase
       {
         'Accept'         => 'application/json',
         'User-Agent'     => USER_AGENT,
-        'X-DocBaseToken' => @access_token,
-        'X-Api-Version'  => 1,
+        'X-DocBaseToken' => access_token,
+        'X-Api-Version'  => 2,
       }
     end
   end
