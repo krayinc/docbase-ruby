@@ -136,7 +136,7 @@ module DocBase
         'Accept'         => 'application/json',
         'User-Agent'     => USER_AGENT,
         'X-DocBaseToken' => @access_token,
-        'X-Api-Version'  => 1,
+        'X-Api-Version'  => '1',
       }
     end
   end
