@@ -185,6 +185,13 @@ client.upload('./test.jpg')
 client.upload(['./test.jpg', './README.md'])
 ```
 
+#### Download
+
+```ruby
+response = client.attachment(file_id)
+File.open(file_id, 'wb') { |f| f.write(response.body) }
+```
+
 ### switch team
 
 ```ruby
