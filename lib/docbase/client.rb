@@ -113,6 +113,10 @@ module DocBase
       connection.post("/teams/#{team!}/attachments", params)
     end
 
+    def attachment(id)
+      connection_for_binary.get("/teams/#{team!}/attachments/#{id}")
+    end
+
     private
 
     def except(hash, reject_key)
@@ -123,6 +127,13 @@ module DocBase
       @connection ||= Faraday.new({ url: @url, headers: headers }) do |faraday|
         faraday.request :json
         faraday.response :json
+        faraday.adapter Faraday.default_adapter
+      end
+    end
+
+    def connection_for_binary
+      @connection ||= Faraday.new({ url: @url, headers: headers }) do |faraday|
+        faraday.request :json
         faraday.adapter Faraday.default_adapter
       end
     end
