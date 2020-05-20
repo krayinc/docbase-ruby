@@ -200,7 +200,7 @@ client.tags.body
 # => [{ name: 'ruby' }, { name: 'rails' }]
 
 client.team = 'danny'
-clinet.access_token = 'danny_team_access_token'
+client.access_token = 'danny_team_access_token'
 client.tags.body
 # => [{ name: 'javascript' }, { name: 'react' }]
 ```
