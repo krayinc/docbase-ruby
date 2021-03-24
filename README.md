@@ -48,6 +48,8 @@ client.tags.body
 
 ```ruby
 client.groups.body
+client.groups(name: 'developers').body
+client.groups(page: 2, per_page: 10).body
 ```
 
 #### Show
