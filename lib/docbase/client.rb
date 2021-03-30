@@ -27,8 +27,8 @@ module DocBase
       connection.get("/teams/#{team!}/tags")
     end
 
-    def groups
-      connection.get("/teams/#{team!}/groups")
+    def groups(name: nil, page: 1, per_page: 100)
+      connection.get("/teams/#{team!}/groups", name: name, page: page, per_page: per_page)
     end
 
     def group(id)
