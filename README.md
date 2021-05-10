@@ -26,6 +26,16 @@ Or install it yourself as:
 client = DocBase::Client.new(access_token: 'your_access_token', team: 'your_team')
 ```
 
+### Docbase::Client.new options
+
+* access_token
+    * access token
+* team
+    * team subdomain
+* retry_on_rate_limit_exceeded
+    * [#16](https://github.com/krayinc/docbase-ruby/issues/16)
+    * true or false
+
 ### users
 
 ```ruby
