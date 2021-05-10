@@ -5,13 +5,15 @@ module DocBase
 
     class NotSetTeamError < StandardError; end
     class NotSetPostIdError < StandardError; end
+    class TooManyRequestError < StandardError; end
 
-    attr_accessor :team, :access_token
+    attr_accessor :team, :access_token, :retry_on_rate_limit_exceeded
 
-    def initialize(access_token: nil, url: nil, team: nil)
+    def initialize(access_token: nil, url: nil, team: nil, retry_on_rate_limit_exceeded: false)
       self.access_token = access_token
       self.team = team
       @url = url || DEFAULT_URL
+      self.retry_on_rate_limit_exceeded = retry_on_rate_limit_exceeded
     end
 
     def team!
@@ -20,23 +22,23 @@ module DocBase
     end
 
     def users(q: nil, page: 1, per_page: 100, include_user_groups: false)
-      connection.get("/teams/#{team!}/users", q: q, page: page, per_page: per_page, include_user_groups: include_user_groups)
+      request(method: :get, path: "/teams/#{team!}/users", params: { q: q, page: page, per_page: per_page, include_user_groups: include_user_groups })
     end
 
     def tags
-      connection.get("/teams/#{team!}/tags")
+      request(method: :get, path: "/teams/#{team!}/tags")
     end
 
     def groups(name: nil, page: 1, per_page: 100)
-      connection.get("/teams/#{team!}/groups", name: name, page: page, per_page: per_page)
+      request(method: :get, path: "/teams/#{team!}/groups", params: { name: name, page: page, per_page: per_page })
     end
 
     def group(id)
-      connection.get("/teams/#{team!}/groups/#{id}")
+      request(method: :get, path: "/teams/#{team!}/groups/#{id}")
     end
 
     def create_group(params)
-      connection.post("/teams/#{team!}/groups", params)
+      request(method: :post, path: "/teams/#{team!}/groups", params: params)
     end
 
     def add_users_to_group(params)
@@ -44,7 +46,7 @@ module DocBase
       raise NotSetTeamError if group_id <= 0
 
       users_params = except(params, :group_id)
-      connection.post("/teams/#{team!}/groups/#{group_id}/users", users_params)
+      request(method: :post, path: "/teams/#{team!}/groups/#{group_id}/users", params: users_params)
     end
 
     def remove_users_from_group(params)
@@ -52,19 +54,19 @@ module DocBase
       raise NotSetTeamError if group_id <= 0
 
       users_params = except(params, :group_id)
-      connection.delete("/teams/#{team!}/groups/#{group_id}/users", users_params)
+      request(method: :delete, path: "/teams/#{team!}/groups/#{group_id}/users", params: users_params)
     end
 
     def post(id)
-      connection.get("/teams/#{team!}/posts/#{id}")
+      request(method: :get, path: "/teams/#{team!}/posts/#{id}")
     end
 
     def posts(q: '*', page: 1, per_page: 20)
-      connection.get("/teams/#{team!}/posts", q: q, page: page, per_page: per_page)
+      request(method: :get, path: "/teams/#{team!}/posts", params: { q: q, page: page, per_page: per_page })
     end
 
     def create_post(params)
-      connection.post("/teams/#{team!}/posts", params)
+      request(method: :post, path: "/teams/#{team!}/posts", params: params)
     end
 
     def update_post(params)
@@ -72,19 +74,19 @@ module DocBase
       raise NotSetTeamError if post_id <= 0
 
       post_params = except(params, :id)
-      connection.patch("/teams/#{team!}/posts/#{post_id}", post_params)
+      request(method: :patch, path: "/teams/#{team!}/posts/#{post_id}", params: post_params)
     end
 
     def delete_post(id)
-      connection.delete("/teams/#{team!}/posts/#{id}")
+      request(method: :delete, path: "/teams/#{team!}/posts/#{id}")
     end
 
     def archive_post(id)
-      connection.put("/teams/#{team!}/posts/#{id}/archive")
+      request(method: :put, path: "/teams/#{team!}/posts/#{id}/archive")
     end
 
     def unarchive_post(id)
-      connection.put("/teams/#{team!}/posts/#{id}/unarchive")
+      request(method: :put, path: "/teams/#{team!}/posts/#{id}/unarchive")
     end
 
     def create_comment(params)
@@ -92,11 +94,11 @@ module DocBase
       raise NotSetTeamError if post_id <= 0
 
       comment_params = except(params, :post_id)
-      connection.post("/teams/#{team!}/posts/#{post_id}/comments", params)
+      request(method: :post, path: "/teams/#{team!}/posts/#{post_id}/comments", params: params)
     end
 
     def delete_comment(id)
-      connection.delete("/teams/#{team!}/comments/#{id}")
+      request(method: :delete, path: "/teams/#{team!}/comments/#{id}")
     end
 
     def upload(paths)
@@ -110,11 +112,11 @@ module DocBase
         }
       end
 
-      connection.post("/teams/#{team!}/attachments", params)
+      request(method: :post, path: "/teams/#{team!}/attachments", params: params)
     end
 
     def attachment(id)
-      connection_for_binary.get("/teams/#{team!}/attachments/#{id}")
+      request(method: :get, path: "/teams/#{team!}/attachments/#{id}", for_binary: true)
     end
 
     private
@@ -145,6 +147,23 @@ module DocBase
         'X-DocBaseToken' => access_token,
         'X-Api-Version'  => '2',
       }
+    end
+
+    def request(method:, path:, params: nil, for_binary: false)
+      response = for_binary ? connection_for_binary.send(method, path, params) : connection.send(method, path, params)
+      raise TooManyRequestError if retry_on_rate_limit_exceeded && response.status == 429
+      response
+    rescue TooManyRequestError
+      reset_time = response.headers['x-ratelimit-reset'].to_i
+      puts "DocBase API Rate limit exceeded: will retry at #{Time.at(reset_time).strftime("%Y/%m/%d %H:%M:%S")}."
+      wait_for(reset_time)
+      retry
+    end
+
+    def wait_for(reset_time)
+      wait_time = reset_time - Time.now.to_i
+      return if wait_time <= 0
+      sleep wait_time
     end
   end
 end
