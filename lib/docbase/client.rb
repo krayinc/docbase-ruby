@@ -25,11 +25,11 @@ module DocBase
       request(method: :get, path: "/teams/#{team!}/profile")
     end
 
-    def users(q: nil, page: 1, per_page: 100, include_user_groups: false)
+    def users(q: nil, page: 1, per_page: 100)
       request(
         method: :get,
         path: "/teams/#{team!}/users",
-        params: { q: q, page: page, per_page: per_page, include_user_groups: include_user_groups }
+        params: { q: q, page: page, per_page: per_page }
       )
     end
 
