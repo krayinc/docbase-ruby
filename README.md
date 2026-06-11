@@ -36,13 +36,33 @@ client = DocBase::Client.new(access_token: 'your_access_token', team: 'your_team
     * [#16](https://github.com/krayinc/docbase-ruby/issues/16)
     * true or false
 
+### profile
+
+```ruby
+client.profile.body
+```
+
 ### users
 
 ```ruby
 client.users(q: 'name')
 client.users(q: 'name', page: 2)
 client.users(q: 'name', page: 1, per_page: 100)
-client.users(q: 'name', page: 1, per_page: 100, include_user_groups: true)
+```
+
+所属グループはv3ではユーザー検索APIのレスポンスに含まれません。`user_groups`を利用してください。
+
+#### User groups
+
+```ruby
+client.user_groups(1).body
+client.user_groups(1, page: 2, per_page: 20).body
+```
+
+#### Delete user
+
+```ruby
+client.delete_user(1)
 ```
 
 ### tags
@@ -150,6 +170,25 @@ params = {
 client.update_post(params)
 ```
 
+#### Partial body update
+
+```ruby
+params = {
+  id: 1,
+  operations: [
+    {
+      start: 3,
+      end: 5,
+      old_content: "line3\r\nline4\r\nline5",
+      content: 'new text',
+    },
+  ],
+  notice: true,
+}
+
+client.update_post_body(params)
+```
+
 #### Archive
 
 ```ruby
@@ -170,6 +209,13 @@ client.delete_post(1)
 
 ### Comment
 
+#### List
+
+```ruby
+client.comments(1).body
+client.comments(1, page: 2, per_page: 20, order: 'desc').body
+```
+
 #### Create
 
 ```ruby
@@ -186,6 +232,28 @@ client.create_comment(params)
 
 ```ruby
 client.delete_comment(1)
+```
+
+### good jobs
+
+#### List
+
+```ruby
+client.good_jobs(1).body
+client.good_jobs(1, page: 2, per_page: 100, order: 'desc').body
+```
+
+#### Create
+
+```ruby
+client.create_good_job(1)
+client.create_good_job(1, notice: false)
+```
+
+#### Delete
+
+```ruby
+client.delete_good_job(1, 111)
 ```
 
 ### attachments

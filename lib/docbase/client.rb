@@ -21,8 +21,28 @@ module DocBase
       @team
     end
 
-    def users(q: nil, page: 1, per_page: 100, include_user_groups: false)
-      request(method: :get, path: "/teams/#{team!}/users", params: { q: q, page: page, per_page: per_page, include_user_groups: include_user_groups })
+    def profile
+      request(method: :get, path: "/teams/#{team!}/profile")
+    end
+
+    def users(q: nil, page: 1, per_page: 100)
+      request(
+        method: :get,
+        path: "/teams/#{team!}/users",
+        params: { q: q, page: page, per_page: per_page }
+      )
+    end
+
+    def user_groups(user_id, page: 1, per_page: 20)
+      request(
+        method: :get,
+        path: "/teams/#{team!}/users/#{user_id}/groups",
+        params: { page: page, per_page: per_page }
+      )
+    end
+
+    def delete_user(id)
+      request(method: :delete, path: "/teams/#{team!}/users/#{id}")
     end
 
     def tags
@@ -71,10 +91,18 @@ module DocBase
 
     def update_post(params)
       post_id = params[:id].to_i
-      raise NotSetTeamError if post_id <= 0
+      raise NotSetPostIdError if post_id <= 0
 
       post_params = except(params, :id)
       request(method: :patch, path: "/teams/#{team!}/posts/#{post_id}", params: post_params)
+    end
+
+    def update_post_body(params)
+      post_id = params[:id].to_i
+      raise NotSetPostIdError if post_id <= 0
+
+      body_params = except(params, :id)
+      request(method: :patch, path: "/teams/#{team!}/posts/#{post_id}/body", params: body_params)
     end
 
     def delete_post(id)
@@ -89,16 +117,52 @@ module DocBase
       request(method: :put, path: "/teams/#{team!}/posts/#{id}/unarchive")
     end
 
+    def comments(post_id, page: 1, per_page: 20, order: 'asc', created_after: nil, created_before: nil)
+      request(
+        method: :get,
+        path: "/teams/#{team!}/posts/#{post_id}/comments",
+        params: {
+          page: page,
+          per_page: per_page,
+          order: order,
+          created_after: created_after,
+          created_before: created_before,
+        }
+      )
+    end
+
     def create_comment(params)
       post_id = params[:post_id].to_i
-      raise NotSetTeamError if post_id <= 0
+      raise NotSetPostIdError if post_id <= 0
 
       comment_params = except(params, :post_id)
-      request(method: :post, path: "/teams/#{team!}/posts/#{post_id}/comments", params: params)
+      request(method: :post, path: "/teams/#{team!}/posts/#{post_id}/comments", params: comment_params)
     end
 
     def delete_comment(id)
       request(method: :delete, path: "/teams/#{team!}/comments/#{id}")
+    end
+
+    def good_jobs(post_id, page: 1, per_page: 100, order: 'asc', created_after: nil, created_before: nil)
+      request(
+        method: :get,
+        path: "/teams/#{team!}/posts/#{post_id}/good_jobs",
+        params: {
+          page: page,
+          per_page: per_page,
+          order: order,
+          created_after: created_after,
+          created_before: created_before,
+        }
+      )
+    end
+
+    def create_good_job(post_id, params = {})
+      request(method: :post, path: "/teams/#{team!}/posts/#{post_id}/good_jobs", params: params)
+    end
+
+    def delete_good_job(post_id, good_job_id)
+      request(method: :delete, path: "/teams/#{team!}/posts/#{post_id}/good_jobs/#{good_job_id}")
     end
 
     def upload(paths)
@@ -134,7 +198,7 @@ module DocBase
     end
 
     def connection_for_binary
-      @connection ||= Faraday.new({ url: @url, headers: headers }) do |faraday|
+      @connection_for_binary ||= Faraday.new({ url: @url, headers: headers }) do |faraday|
         faraday.request :json
         faraday.adapter Faraday.default_adapter
       end
@@ -145,12 +209,12 @@ module DocBase
         'Accept'         => 'application/json',
         'User-Agent'     => USER_AGENT,
         'X-DocBaseToken' => access_token,
-        'X-Api-Version'  => '2',
       }
     end
 
     def request(method:, path:, params: nil, for_binary: false)
-      response = for_binary ? connection_for_binary.send(method, path, params) : connection.send(method, path, params)
+      conn = for_binary ? connection_for_binary : connection
+      response = conn.send(method, path, params)
       raise TooManyRequestError if retry_on_rate_limit_exceeded && response.status == 429
       response
     rescue TooManyRequestError
