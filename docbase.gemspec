@@ -18,5 +18,5 @@ Gem::Specification.new do |spec|
   spec.require_paths = ['lib']
 
   spec.add_dependency 'base64'
-  spec.add_dependency 'faraday', '>= 1.10.6', '< 3'
+  spec.add_dependency 'faraday', '>= 2.14.4', '< 3'
 end

@@ -9,11 +9,11 @@ describe 'docbase.gemspec' do
   end
 
   it 'rejects faraday versions with known vulnerabilities' do
-    %w[0.17.6 1.10.5].each { |v| expect(faraday.match?('faraday', v)).to be false }
+    %w[0.17.6 1.10.6 2.14.2 2.14.3].each { |v| expect(faraday.match?('faraday', v)).to be false }
   end
 
-  it 'accepts patched faraday 1.x and 2.x' do
-    %w[1.10.6 2.15.1].each { |v| expect(faraday.match?('faraday', v)).to be true }
+  it 'accepts patched faraday 2.x' do
+    %w[2.14.4 2.15.1].each { |v| expect(faraday.match?('faraday', v)).to be true }
   end
 end
 
