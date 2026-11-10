@@ -1,8 +1,3 @@
-## Unreleased
-
-* `faraday_middleware`への依存をやめ、faraday 2に対応
-* 既知の脆弱性がある古いfaradayを使わないよう、faradayの指定を`>= 1.10.6, < 3`に変更
-
 ## 3.0.0
 
 * DocBase API v3対応
