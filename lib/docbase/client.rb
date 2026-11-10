@@ -225,7 +225,6 @@ module DocBase
         return response if reset_time.nil? || retries >= MAX_RATE_LIMIT_RETRIES
 
         retries += 1
-        puts "DocBase API Rate limit exceeded: will retry at #{Time.at(reset_time).strftime("%Y/%m/%d %H:%M:%S")}."
         wait_for(reset_time)
       end
     end
@@ -236,9 +235,9 @@ module DocBase
     end
 
     def wait_for(reset_time)
-      wait_time = reset_time - Time.now.to_i
-      return if wait_time <= 0
-      sleep [wait_time, MAX_RATE_LIMIT_WAIT_SECONDS].min
+      wait_time = (reset_time - Time.now.to_i).clamp(0, MAX_RATE_LIMIT_WAIT_SECONDS)
+      puts "DocBase API Rate limit exceeded: will retry at #{(Time.now + wait_time).strftime("%Y/%m/%d %H:%M:%S")}."
+      sleep wait_time if wait_time > 0
     end
   end
 end
