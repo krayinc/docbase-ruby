@@ -35,6 +35,7 @@ client = DocBase::Client.new(access_token: 'your_access_token', team: 'your_team
 * retry_on_rate_limit_exceeded
     * [#16](https://github.com/krayinc/docbase-ruby/issues/16)
     * true or false
+    * When true, a 429 response is retried after waiting until `X-RateLimit-Reset`, up to 3 times and at most 60 seconds per wait. A 429 response without a valid `X-RateLimit-Reset` is returned without retrying.
 
 ### profile
 

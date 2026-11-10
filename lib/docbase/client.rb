@@ -2,6 +2,8 @@ module DocBase
   class Client
     DEFAULT_URL = 'https://api.docbase.io'
     USER_AGENT = "DocBase Ruby Gem #{DocBase::VERSION}"
+    MAX_RATE_LIMIT_RETRIES = 3
+    MAX_RATE_LIMIT_WAIT_SECONDS = 60
 
     class NotSetTeamError < StandardError; end
     class NotSetPostIdError < StandardError; end
@@ -213,21 +215,30 @@ module DocBase
     end
 
     def request(method:, path:, params: nil, for_binary: false)
-      conn = for_binary ? connection_for_binary : connection
-      response = conn.send(method, path, params)
-      raise TooManyRequestError if retry_on_rate_limit_exceeded && response.status == 429
-      response
-    rescue TooManyRequestError
-      reset_time = response.headers['x-ratelimit-reset'].to_i
-      puts "DocBase API Rate limit exceeded: will retry at #{Time.at(reset_time).strftime("%Y/%m/%d %H:%M:%S")}."
-      wait_for(reset_time)
-      retry
+      retries = 0
+      loop do
+        conn = for_binary ? connection_for_binary : connection
+        response = conn.send(method, path, params)
+        return response unless retry_on_rate_limit_exceeded && response.status == 429
+
+        reset_time = rate_limit_reset_time(response)
+        return response if reset_time.nil? || retries >= MAX_RATE_LIMIT_RETRIES
+
+        retries += 1
+        puts "DocBase API Rate limit exceeded: will retry at #{Time.at(reset_time).strftime("%Y/%m/%d %H:%M:%S")}."
+        wait_for(reset_time)
+      end
+    end
+
+    def rate_limit_reset_time(response)
+      reset_time = Integer(response.headers['x-ratelimit-reset'].to_s, exception: false)
+      reset_time if reset_time && reset_time > 0
     end
 
     def wait_for(reset_time)
       wait_time = reset_time - Time.now.to_i
       return if wait_time <= 0
-      sleep wait_time
+      sleep [wait_time, MAX_RATE_LIMIT_WAIT_SECONDS].min
     end
   end
 end
