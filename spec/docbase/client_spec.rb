@@ -26,6 +26,29 @@ describe DocBase::Client do
     end
   end
 
+  describe 'access_token' do
+    let(:sent_tokens) { [] }
+    let(:stubs) do
+      Faraday::Adapter::Test::Stubs.new do |stub|
+        stub.get("/teams/kray/tags") { |env| sent_tokens << env.request_headers['X-DocBaseToken']; [200, {}, '[]'] }
+        stub.get("/teams/kray/attachments/1") { |env| sent_tokens << env.request_headers['X-DocBaseToken']; [200, {}, ''] }
+      end
+    end
+    let(:connection) { Faraday.new { |c| c.adapter :test, stubs } }
+
+    before { allow(client).to receive(:connection_for_binary).and_return(connection) }
+
+    it 'sends the current token after it is changed' do
+      client.tags
+      client.attachment(1)
+      client.access_token = 'new_token'
+      client.tags
+      client.attachment(1)
+
+      expect(sent_tokens).to eq([access_token, access_token, 'new_token', 'new_token'])
+    end
+  end
+
   shared_examples 'stub connection' do |arg|
     subject { response_body }
     it { should eq(response_body) }
