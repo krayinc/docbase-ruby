@@ -26,6 +26,29 @@ describe DocBase::Client do
     end
   end
 
+  describe 'access_token' do
+    let(:sent_tokens) { [] }
+    let(:stubs) do
+      Faraday::Adapter::Test::Stubs.new do |stub|
+        stub.get("/teams/kray/tags") { |env| sent_tokens << env.request_headers['X-DocBaseToken']; [200, {}, '[]'] }
+        stub.get("/teams/kray/attachments/1") { |env| sent_tokens << env.request_headers['X-DocBaseToken']; [200, {}, ''] }
+      end
+    end
+    let(:connection) { Faraday.new { |c| c.adapter :test, stubs } }
+
+    before { allow(client).to receive(:connection_for_binary).and_return(connection) }
+
+    it 'sends the current token after it is changed' do
+      client.tags
+      client.attachment(1)
+      client.access_token = 'new_token'
+      client.tags
+      client.attachment(1)
+
+      expect(sent_tokens).to eq([access_token, access_token, 'new_token', 'new_token'])
+    end
+  end
+
   shared_examples 'stub connection' do |arg|
     subject { response_body }
     it { should eq(response_body) }
@@ -250,6 +273,42 @@ describe DocBase::Client do
     context 'when id is missing' do
       it 'raises NotSetPostIdError' do
         expect { client.update_post(title: 'title') }.to raise_error(DocBase::Client::NotSetPostIdError)
+      end
+    end
+  end
+
+  describe 'path segments' do
+    let(:method) { :get }
+    let(:path) { '/' }
+    let(:body) { nil }
+
+    it 'rejects ids that are not positive integers without sending a request' do
+      expect(connection).not_to receive(:delete)
+      ['../users/5', '1?q=x', '1/users', '..', '', nil, 0, -1].each do |id|
+        expect { client.delete_post(id) }.to raise_error(ArgumentError)
+      end
+      expect { client.delete_comment('../posts/9') }.to raise_error(ArgumentError)
+      expect { client.delete_good_job(1, '../../users/5') }.to raise_error(ArgumentError)
+    end
+
+    it 'rejects an invalid team' do
+      ['kray/../other', 'kray?x=1', 'Kray', 'kray-', ''].each do |team|
+        client.team = team
+        expect { client.tags }.to raise_error(ArgumentError)
+      end
+    end
+
+    context 'attachment id' do
+      let(:path) { '/teams/kray/attachments/..%2F..%2Fusers%2F5' }
+
+      before { allow(client).to receive(:connection_for_binary).and_return(connection) }
+
+      it 'escapes the id as one path segment' do
+        expect(client.attachment('../../users/5').status).to eq(200)
+      end
+
+      it 'rejects dot segments' do
+        expect { client.attachment('..') }.to raise_error(ArgumentError)
       end
     end
   end
