@@ -277,6 +277,42 @@ describe DocBase::Client do
     end
   end
 
+  describe 'path segments' do
+    let(:method) { :get }
+    let(:path) { '/' }
+    let(:body) { nil }
+
+    it 'rejects ids that are not positive integers without sending a request' do
+      expect(connection).not_to receive(:delete)
+      ['../users/5', '1?q=x', '1/users', '..', '', nil, 0, -1].each do |id|
+        expect { client.delete_post(id) }.to raise_error(ArgumentError)
+      end
+      expect { client.delete_comment('../posts/9') }.to raise_error(ArgumentError)
+      expect { client.delete_good_job(1, '../../users/5') }.to raise_error(ArgumentError)
+    end
+
+    it 'rejects an invalid team' do
+      ['kray/../other', 'kray?x=1', 'Kray', 'kray-', ''].each do |team|
+        client.team = team
+        expect { client.tags }.to raise_error(ArgumentError)
+      end
+    end
+
+    context 'attachment id' do
+      let(:path) { '/teams/kray/attachments/..%2F..%2Fusers%2F5' }
+
+      before { allow(client).to receive(:connection_for_binary).and_return(connection) }
+
+      it 'escapes the id as one path segment' do
+        expect(client.attachment('../../users/5').status).to eq(200)
+      end
+
+      it 'rejects dot segments' do
+        expect { client.attachment('..') }.to raise_error(ArgumentError)
+      end
+    end
+  end
+
   describe '#request' do
     context 'API rate limit exceeded' do
       before { allow(Time).to receive_message_chain(:now).and_return(Time.now) }

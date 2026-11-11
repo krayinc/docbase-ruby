@@ -1,6 +1,8 @@
 module DocBase
   class Client
     DEFAULT_URL = 'https://api.docbase.io'
+    TEAM_FORMAT = /\A[a-z0-9]+(-[a-z0-9]+)*\z/
+    ID_FORMAT = /\A[1-9][0-9]*\z/
     USER_AGENT = "DocBase Ruby Gem #{DocBase::VERSION}"
 
     class NotSetTeamError < StandardError; end
@@ -18,6 +20,8 @@ module DocBase
 
     def team!
       raise NotSetTeamError unless @team
+      raise ArgumentError, "invalid team: #{@team.inspect}" unless TEAM_FORMAT.match?(@team.to_s)
+
       @team
     end
 
@@ -36,13 +40,13 @@ module DocBase
     def user_groups(user_id, page: 1, per_page: 20)
       request(
         method: :get,
-        path: "/teams/#{team!}/users/#{user_id}/groups",
+        path: "/teams/#{team!}/users/#{id_segment(user_id)}/groups",
         params: { page: page, per_page: per_page }
       )
     end
 
     def delete_user(id)
-      request(method: :delete, path: "/teams/#{team!}/users/#{id}")
+      request(method: :delete, path: "/teams/#{team!}/users/#{id_segment(id)}")
     end
 
     def tags
@@ -54,7 +58,7 @@ module DocBase
     end
 
     def group(id)
-      request(method: :get, path: "/teams/#{team!}/groups/#{id}")
+      request(method: :get, path: "/teams/#{team!}/groups/#{id_segment(id)}")
     end
 
     def create_group(params)
@@ -78,7 +82,7 @@ module DocBase
     end
 
     def post(id)
-      request(method: :get, path: "/teams/#{team!}/posts/#{id}")
+      request(method: :get, path: "/teams/#{team!}/posts/#{id_segment(id)}")
     end
 
     def posts(q: '*', page: 1, per_page: 20)
@@ -106,21 +110,21 @@ module DocBase
     end
 
     def delete_post(id)
-      request(method: :delete, path: "/teams/#{team!}/posts/#{id}")
+      request(method: :delete, path: "/teams/#{team!}/posts/#{id_segment(id)}")
     end
 
     def archive_post(id)
-      request(method: :put, path: "/teams/#{team!}/posts/#{id}/archive")
+      request(method: :put, path: "/teams/#{team!}/posts/#{id_segment(id)}/archive")
     end
 
     def unarchive_post(id)
-      request(method: :put, path: "/teams/#{team!}/posts/#{id}/unarchive")
+      request(method: :put, path: "/teams/#{team!}/posts/#{id_segment(id)}/unarchive")
     end
 
     def comments(post_id, page: 1, per_page: 20, order: 'asc', created_after: nil, created_before: nil)
       request(
         method: :get,
-        path: "/teams/#{team!}/posts/#{post_id}/comments",
+        path: "/teams/#{team!}/posts/#{id_segment(post_id)}/comments",
         params: {
           page: page,
           per_page: per_page,
@@ -140,13 +144,13 @@ module DocBase
     end
 
     def delete_comment(id)
-      request(method: :delete, path: "/teams/#{team!}/comments/#{id}")
+      request(method: :delete, path: "/teams/#{team!}/comments/#{id_segment(id)}")
     end
 
     def good_jobs(post_id, page: 1, per_page: 100, order: 'asc', created_after: nil, created_before: nil)
       request(
         method: :get,
-        path: "/teams/#{team!}/posts/#{post_id}/good_jobs",
+        path: "/teams/#{team!}/posts/#{id_segment(post_id)}/good_jobs",
         params: {
           page: page,
           per_page: per_page,
@@ -158,11 +162,11 @@ module DocBase
     end
 
     def create_good_job(post_id, params = {})
-      request(method: :post, path: "/teams/#{team!}/posts/#{post_id}/good_jobs", params: params)
+      request(method: :post, path: "/teams/#{team!}/posts/#{id_segment(post_id)}/good_jobs", params: params)
     end
 
     def delete_good_job(post_id, good_job_id)
-      request(method: :delete, path: "/teams/#{team!}/posts/#{post_id}/good_jobs/#{good_job_id}")
+      request(method: :delete, path: "/teams/#{team!}/posts/#{id_segment(post_id)}/good_jobs/#{id_segment(good_job_id)}")
     end
 
     def upload(paths)
@@ -180,10 +184,23 @@ module DocBase
     end
 
     def attachment(id)
-      request(method: :get, path: "/teams/#{team!}/attachments/#{id}", for_binary: true)
+      request(method: :get, path: "/teams/#{team!}/attachments/#{path_segment(id)}", for_binary: true)
     end
 
     private
+
+    def id_segment(id)
+      raise ArgumentError, "invalid id: #{id.inspect}" unless ID_FORMAT.match?(id.to_s)
+
+      id.to_s
+    end
+
+    def path_segment(value)
+      value = value.to_s
+      raise ArgumentError, "invalid id: #{value.inspect}" if value.empty? || value == '.' || value == '..'
+
+      URI.encode_www_form_component(value).gsub('+', '%20')
+    end
 
     def except(hash, reject_key)
       hash.reject { |key, _| key == reject_key }
