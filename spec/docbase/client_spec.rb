@@ -342,5 +342,62 @@ describe DocBase::Client do
         expect(response_body).to eq(retry_connection_body)
       end
     end
+
+    context 'when rate limited with retry enabled' do
+      let(:client) { DocBase::Client.new(access_token: access_token, team: 'kray', retry_on_rate_limit_exceeded: true) }
+      let(:request_count) { [0] }
+      let(:connection) do
+        Faraday.new do |c|
+          c.adapter :test, Faraday::Adapter::Test::Stubs.new do |stub|
+            stub.get('/teams/kray/tags') do
+              request_count[0] += 1
+              [429, rate_limit_headers, '{}']
+            end
+          end
+        end
+      end
+
+      before do
+        allow(client).to receive(:sleep)
+        allow(client).to receive(:puts)
+      end
+
+      context 'without x-ratelimit-reset' do
+        let(:rate_limit_headers) { {} }
+
+        it 'returns the 429 response without retrying' do
+          expect(client.tags.status).to eq(429)
+          expect(request_count[0]).to eq(1)
+          expect(client).not_to have_received(:sleep)
+        end
+      end
+
+      context 'with non-numeric x-ratelimit-reset' do
+        let(:rate_limit_headers) { { 'x-ratelimit-reset' => 'soon' } }
+
+        it 'returns the 429 response without retrying' do
+          expect(client.tags.status).to eq(429)
+          expect(request_count[0]).to eq(1)
+        end
+      end
+
+      context 'when 429 continues' do
+        let(:rate_limit_headers) { { 'x-ratelimit-reset' => (Time.now.to_i + 1).to_s } }
+
+        it 'stops after the maximum number of retries' do
+          expect(client.tags.status).to eq(429)
+          expect(request_count[0]).to eq(DocBase::Client::MAX_RATE_LIMIT_RETRIES + 1)
+        end
+      end
+
+      context 'with x-ratelimit-reset far in the future' do
+        let(:rate_limit_headers) { { 'x-ratelimit-reset' => (Time.now.to_i + 86_400).to_s } }
+
+        it 'caps each wait' do
+          client.tags
+          expect(client).to have_received(:sleep).with(DocBase::Client::MAX_RATE_LIMIT_WAIT_SECONDS).exactly(DocBase::Client::MAX_RATE_LIMIT_RETRIES).times
+        end
+      end
+    end
   end
 end
