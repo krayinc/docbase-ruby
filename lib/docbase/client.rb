@@ -206,15 +206,14 @@ module DocBase
 
     def headers
       {
-        'Accept'         => 'application/json',
-        'User-Agent'     => USER_AGENT,
-        'X-DocBaseToken' => access_token,
+        'Accept'     => 'application/json',
+        'User-Agent' => USER_AGENT,
       }
     end
 
     def request(method:, path:, params: nil, for_binary: false)
       conn = for_binary ? connection_for_binary : connection
-      response = conn.send(method, path, params)
+      response = conn.send(method, path, params, 'X-DocBaseToken' => access_token)
       raise TooManyRequestError if retry_on_rate_limit_exceeded && response.status == 429
       response
     rescue TooManyRequestError
