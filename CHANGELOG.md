@@ -1,3 +1,10 @@
+## 3.1.0
+
+* faradayを2.14.4以上3未満に変更し、faraday_middlewareへの依存を削除（faraday 2.14.3以前では使えなくなります）
+* `access_token`を差し替えても古いトークンで送信される不具合を修正
+* IDやチーム名が不正なときはURLに埋め込まず`ArgumentError`にするように
+* 利用制限時のリトライに上限を追加（3回まで、1回の待ちは60秒まで）。有効な`X-RateLimit-Reset`がない429はリトライしない
+
 ## 3.0.0
 
 * DocBase API v3対応
